@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\selectlanguage{spanish}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr} 
+\pagestyle{fancy} 
+\author{Omnestek (c) 2016}
+\title{Implementaci\'on de servidor ntp en Ubuntu}
+\lhead{Omnestek (c) 2016}
+\begin{document}
+\maketitle
+\section{Configuraci\'on del Servidor}
+Lo primero que se debe realizar es la configuraci\'on del servidor de ntp (Network Time Protocol) para lo cual utilizaremos apt-get install ntp
+\begin{verbatim}
+$ sudo apt-get install ntp
+\end{verbatim}
+Despu\'es de \'esto debemos editar el archivo /etc/ntp.conf para ajustar los servidores a los que se les har\'an las peticiones en primer lugar.
+
+Como siguiente paso debemos verificar la configuraci\'on de nuestra red
+
+\begin{verbatim}
+$ ifconfig
+	  eth0      Link encap:Ethernet  direcci\'onHW b8:ae:ed:94:60:10  
+          Direc. inet:192.168.1.XXX  Difus.:192.168.1.255  M\'asc:255.255.255.0
+          Direcci\'on inet6: fe80::baae:edff:fe94:6010/64 Alcance:Enlace
+          ACTIVO DIFUSI\'ONN FUNCIONANDO MULTICAST  MTU:1500  M\'etrica:1
+          Paquetes RX:155197238 errores:0 perdidos:22093 overruns:0 frame:0
+          Paquetes TX:145506445 errores:0 perdidos:0 overruns:0 carrier:0
+          colisiones:0 long.colaTX:1000 
+          Bytes RX:22398083673 (22.3 GB)  TX bytes:30080215169 (30.0 GB)
+\end{verbatim}
+Como podemos ver, tenemos una red configurada a 3 octetos. Entonces agregaremos las siguientes l\'inea al archivo de configuraci\'on ntp.conf
+\begin{verbatim}
+restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+# If you want to provide time to your local subnet, change the next line.
+# (Again, the address is an example only.)
+broadcast 192.168.1.255
+\end{verbatim}
+Salir y reiniciar el servicio
+\begin{verbatim}
+$ /etc/init.d/ntp restart
+\end{verbatim}
+Con \'esto ya tenemos listo el servidor para que sea consultado por otros ordenadores y podemos ver su estatus con el siguiente comando
+\begin{verbatim}
+Time100.Stupi.S .PPS.            1 u    4   64    1  227.401   14.989   0.000
+ juniperberry.ca 193.79.237.14    2 u    3   64    1  183.433    7.461   0.000
+ 192.168.1.255   .BCST.          16 u    -   64    0    0.000    0.000   0.000
+ \end{verbatim}
+\section{Configuraci\'on de los Clientes}
+\subsection{Linux}
+Para un ordenador con Linux hay que instalar tambi\'en el paquete ntp con apt-get y luego editar el archivo /etc/ntp.conf
+\begin{verbatim}
+server 192.168.1.XXX prefer iburst
+\end{verbatim}
+Salir y reiniciar el servicio
+\begin{verbatim}
+$ /etc/init.d/ntp restart
+\end{verbatim}
+\subsection{Windows}
+Para configurar en una m\'aquina con Windows hay que dar doble click en la hora y luego en la pesta\~na de Hora de Internet ingresar la direcci\'on del servidor een el campo servidor.
+\section{Referencias}
+\begin{enumerate}
+\item http://askubuntu.com/questions/14558/how-do-i-setup-a-local-ntp-server
+\item http://blogging.dragon.org.uk/setting-up-ntp-on-ubuntu-14-04/
+\end{enumerate}
+\end{document}
